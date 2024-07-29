@@ -8,5 +8,11 @@ namespace Chess.Scripts.Core {
         private void Start() {
             transform.position = ChessBoardPlacementHandler.Instance.GetTile(row, column).transform.position;
         }
+        private void Update()
+        {
+            transform.position = ChessBoardPlacementHandler.Instance.GetTile(row, column).transform.position;
+        }
+
+
     }
 }
