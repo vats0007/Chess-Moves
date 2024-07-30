@@ -35,9 +35,9 @@ A chess game implemented in Unity. This project includes the basic functionality
 
 ## Project Structure
 
-- `Assets/Scripts/`: Contains C# scripts for the game logic.
-- `Assets/Scenes/`: Contains the Unity scene files.
-- `Assets/Prefabs/`: Contains prefabs for chess pieces and other game objects.
+- `Assets/Chess/Scripts/`: Contains C# scripts for the game logic.
+- `Assets/Chess/Scenes/`: Contains the Unity scene files.
+- `Assets/Chess/Prefabs/`: Contains prefabs for chess pieces and other game objects.
 
 ## Scripts
 
