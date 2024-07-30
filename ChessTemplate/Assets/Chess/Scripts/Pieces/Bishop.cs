@@ -7,38 +7,24 @@ using System;
 public class Bishop : Piece
 {
     public Transform playerPositions;
+    public Transform enemyPositions;
     private ChessPlayerPlacementHandler _chessPlayerPlacementHandler;
 
+    private int[,] friendlyPiecesPos;
+    private int[,] enemyPiecesPos;
 
     private int _row;
     private int _column;
-
+    //Tracking Vars for debugging
     private int topRightBlock, topLeftBlock, bottomRightBlock, bottomLeftBlock;
 
-    private int[,] friendlyPiecesPos;
     // Start is called before the first frame update
     void Start()
     {
         friendlyPiecesPos = new int[8, 8];
+        enemyPiecesPos = new int[8, 8];
         _chessPlayerPlacementHandler = GetComponent<ChessPlayerPlacementHandler>();
         GetMyPosition();
-        for (var i = 0; i < 8; i++)
-        {
-            for (var j = 0; j < 8; j++)
-            {
-                Debug.Log(i + "," + j + "=" + friendlyPiecesPos[i, j]);
-            }
-        }
-        CheckForFriendlyPieces();
-        for (var i = 0; i < 8; i++)
-        {
-            for (var j = 0; j < 8; j++)
-            {
-                Debug.Log(i + "," + j + "=" + friendlyPiecesPos[i, j]);
-            }
-        }
-        CalculatePossibleMoves();
-
     }
 
     // Update is called once per frame
@@ -50,23 +36,26 @@ public class Bishop : Piece
     public override void CalculatePossibleMoves()
     {
         GetMyPosition();
-        CheckForFriendlyPieces();
-        if (!isSelected) return;
         ChessBoardPlacementHandler.Instance.ClearHighlights();
-        //They Are Friendly
+        CheckForFriendlyPieces();
+        CheckForEnemyPieces();
+        if (!isSelected) return;
         //topRightBlock
         topRightBlock = -1;
         for (int i = _row + 1, j = _column + 1; i < 8 && j < 8; i++, j++)
         {
             if (friendlyPiecesPos[i, j] == 1)
             {
-                topLeftBlock = i;
+                topRightBlock = i;
                 break;
             }
-            else
+            if (enemyPiecesPos[i,j] == -1)
             {
-                ChessBoardPlacementHandler.Instance.Highlight(i, j);
+                ChessBoardPlacementHandler.Instance.RedHighlight(i, j);
+                break;
             }
+            ChessBoardPlacementHandler.Instance.Highlight(i, j);
+            
         }
         //topLeftBlock
         topLeftBlock = -1;
@@ -74,13 +63,15 @@ public class Bishop : Piece
         {
             if (friendlyPiecesPos[i, j] == 1)
             {
-                topRightBlock = i;
+                topLeftBlock = i;
                 break;
             }
-            else
+            if (enemyPiecesPos[i, j] == -1)
             {
-                ChessBoardPlacementHandler.Instance.Highlight(i, j);
+                ChessBoardPlacementHandler.Instance.RedHighlight(i, j);
+                break;
             }
+            ChessBoardPlacementHandler.Instance.Highlight(i, j);
         }
         //bottomRightBlock
         bottomRightBlock = -1;
@@ -91,10 +82,12 @@ public class Bishop : Piece
                 bottomRightBlock = j;
                 break;
             }
-            else
+            if (enemyPiecesPos[i, j] == -1)
             {
-                ChessBoardPlacementHandler.Instance.Highlight(i, j);
+                ChessBoardPlacementHandler.Instance.RedHighlight(i, j);
+                break;
             }
+            ChessBoardPlacementHandler.Instance.Highlight(i, j);
         }
         //bottomLeftBlock
         bottomLeftBlock = -1;
@@ -105,10 +98,12 @@ public class Bishop : Piece
                 bottomLeftBlock = j;
                 break;
             }
-            else
+            if (enemyPiecesPos[i, j] == -1)
             {
-                ChessBoardPlacementHandler.Instance.Highlight(i, j);
+                ChessBoardPlacementHandler.Instance.RedHighlight(i, j);
+                break;
             }
+            ChessBoardPlacementHandler.Instance.Highlight(i, j);
         }
     }
 
@@ -119,9 +114,10 @@ public class Bishop : Piece
     }
 
 
+    //Checking For FriendlyPieces
     public override void CheckForFriendlyPieces()
     {
-        SetAllIntsToZero();
+        SetAllIntsToZero(friendlyPiecesPos); //Setting them each time to Zero
         foreach (Transform friendlyPieces in playerPositions)
         {
             ChessPlayerPlacementHandler tempChessPlayerPlacementHandler = friendlyPieces.GetComponent<ChessPlayerPlacementHandler>();
@@ -132,15 +128,29 @@ public class Bishop : Piece
         }
     }
 
-    private void SetAllIntsToZero()
+    //Init array with 0 
+    private void SetAllIntsToZero(int[,] piecePos)
     {
-        for (int i = 0; i < friendlyPiecesPos.GetLength(0); i++)
+        for (int i = 0; i < piecePos.GetLength(0); i++)
         {
-            for (int j = 0; j < friendlyPiecesPos.GetLength(1); j++)
+            for (int j = 0; j < piecePos.GetLength(1); j++)
             {
-                friendlyPiecesPos[i, j] = 0;
+                piecePos[i, j] = 0;
             }
         }
     }
 
+    //Check For Enemy Pieces
+    public override void CheckForEnemyPieces()
+    {
+        SetAllIntsToZero(enemyPiecesPos);
+        foreach (Transform enemyPieces in enemyPositions)
+        {
+            ChessEnemyPlacementHandler tempChessEnemyPlacementHandler = enemyPieces.GetComponent<ChessEnemyPlacementHandler>();
+            var tRow = tempChessEnemyPlacementHandler.row;
+            var tCol = tempChessEnemyPlacementHandler.column;
+
+            enemyPiecesPos[tRow, tCol] = -1;
+        }
+    }
 }

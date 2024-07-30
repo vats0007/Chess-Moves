@@ -7,7 +7,7 @@ using System;
 public class Knight : Piece
 {
     public Transform playerPositions;
-    //public GameObject enemyPositions;
+    public Transform enemyPositions;
     private ChessPlayerPlacementHandler _chessPlayerPlacementHandler;
 
 
@@ -15,10 +15,12 @@ public class Knight : Piece
     private int _column;
 
     private int[,] friendlyPiecesPos;
+    private int[,] enemyPiecesPos;
     // Start is called before the first frame update
     void Start()
     {
         friendlyPiecesPos = new int[8, 8];
+        enemyPiecesPos = new int[8, 8];
         _chessPlayerPlacementHandler = GetComponent<ChessPlayerPlacementHandler>();
         GetMyPosition();
     }
@@ -32,11 +34,11 @@ public class Knight : Piece
     public override void CalculatePossibleMoves()
     {
         GetMyPosition();
+        ChessBoardPlacementHandler.Instance.ClearHighlights();
         CheckForFriendlyPieces();
+        CheckForEnemyPieces();
         if (!isSelected) return;
         //For Knight
-        ChessBoardPlacementHandler.Instance.ClearHighlights();
-
         //All possible Move Adders init
         int[,] knightMoveAdder = new int[,]
         {
@@ -44,14 +46,20 @@ public class Knight : Piece
             { 1, 2 }, { 1, -2 }, { -1, 2 }, { -1, -2 }
         };
 
-        for(int i = 0; i < knightMoveAdder.GetLength(0); i++)
+        for (int i = 0; i < knightMoveAdder.GetLength(0); i++)
         {
             int newRow = _row + knightMoveAdder[i, 0];
             int newColumn = _column + knightMoveAdder[i, 1];
 
-            if (newRow >= 0 && newRow < 8 && newColumn >= 0 && newColumn < 8)
+            if (newRow < 0 || newRow >= 8 || newColumn < 0 || newColumn >= 8) continue;
+
+            if (friendlyPiecesPos[newRow, newColumn] == 0)
             {
-                if (friendlyPiecesPos[newRow,newColumn] == 0)
+                if (enemyPiecesPos[newRow, newColumn] == -1)
+                {
+                    ChessBoardPlacementHandler.Instance.RedHighlight(newRow, newColumn);
+                }
+                else
                 {
                     ChessBoardPlacementHandler.Instance.Highlight(newRow, newColumn);
                 }
@@ -66,9 +74,10 @@ public class Knight : Piece
     }
 
 
+    //Checking For FriendlyPieces
     public override void CheckForFriendlyPieces()
     {
-        SetAllIntsToZero();
+        SetAllIntsToZero(friendlyPiecesPos); //Setting them each time to Zero
         foreach (Transform friendlyPieces in playerPositions)
         {
             ChessPlayerPlacementHandler tempChessPlayerPlacementHandler = friendlyPieces.GetComponent<ChessPlayerPlacementHandler>();
@@ -79,14 +88,29 @@ public class Knight : Piece
         }
     }
 
-    private void SetAllIntsToZero()
+    //Init array with 0 
+    private void SetAllIntsToZero(int[,] piecePos)
     {
-        for (int i = 0; i < friendlyPiecesPos.GetLength(0); i++)
+        for (int i = 0; i < piecePos.GetLength(0); i++)
         {
-            for (int j = 0; j < friendlyPiecesPos.GetLength(1); j++)
+            for (int j = 0; j < piecePos.GetLength(1); j++)
             {
-                friendlyPiecesPos[i, j] = 0;
+                piecePos[i, j] = 0;
             }
+        }
+    }
+
+    //Check For Enemy Pieces
+    public override void CheckForEnemyPieces()
+    {
+        SetAllIntsToZero(enemyPiecesPos);
+        foreach (Transform enemyPieces in enemyPositions)
+        {
+            ChessEnemyPlacementHandler tempChessEnemyPlacementHandler = enemyPieces.GetComponent<ChessEnemyPlacementHandler>();
+            var tRow = tempChessEnemyPlacementHandler.row;
+            var tCol = tempChessEnemyPlacementHandler.column;
+
+            enemyPiecesPos[tRow, tCol] = -1;
         }
     }
 }

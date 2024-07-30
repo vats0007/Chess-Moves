@@ -6,6 +6,7 @@ using System.Diagnostics.CodeAnalysis;
 public sealed class ChessBoardPlacementHandler : MonoBehaviour {
     [SerializeField] private GameObject[] _rowsArray;
     [SerializeField] private GameObject _highlightPrefab;
+    [SerializeField] private GameObject _redHighlightPrefab;
     private GameObject[,] _chessBoard;
 
     internal static ChessBoardPlacementHandler Instance;
@@ -53,6 +54,18 @@ public sealed class ChessBoardPlacementHandler : MonoBehaviour {
                 }
             }
         }
+    }
+
+    internal void RedHighlight(int row, int col)
+    {
+        var tile = GetTile(row, col).transform;
+        if (tile == null)
+        {
+            Debug.LogError("Invalid row or column.");
+            return;
+        }
+
+        Instantiate(_redHighlightPrefab, tile.transform.position, Quaternion.identity, tile.transform);
     }
 
 
