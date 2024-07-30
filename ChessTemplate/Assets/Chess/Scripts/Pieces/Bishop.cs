@@ -4,23 +4,41 @@ using UnityEngine;
 using Chess.Scripts.Core;
 using System;
 
-public class Rook : Piece
+public class Bishop : Piece
 {
     public Transform playerPositions;
     private ChessPlayerPlacementHandler _chessPlayerPlacementHandler;
 
+
     private int _row;
     private int _column;
-    private int[,] friendlyPiecesPos;
 
-    //Tracking Vars for debugging
-    private int upperBlockInColumn, lowerBlockInColumn, rightBlockInRow, leftBlockInRow;
+    private int topRightBlock, topLeftBlock, bottomRightBlock, bottomLeftBlock;
+
+    private int[,] friendlyPiecesPos;
     // Start is called before the first frame update
     void Start()
     {
         friendlyPiecesPos = new int[8, 8];
         _chessPlayerPlacementHandler = GetComponent<ChessPlayerPlacementHandler>();
         GetMyPosition();
+        for (var i = 0; i < 8; i++)
+        {
+            for (var j = 0; j < 8; j++)
+            {
+                Debug.Log(i + "," + j + "=" + friendlyPiecesPos[i, j]);
+            }
+        }
+        CheckForFriendlyPieces();
+        for (var i = 0; i < 8; i++)
+        {
+            for (var j = 0; j < 8; j++)
+            {
+                Debug.Log(i + "," + j + "=" + friendlyPiecesPos[i, j]);
+            }
+        }
+        CalculatePossibleMoves();
+
     }
 
     // Update is called once per frame
@@ -36,66 +54,60 @@ public class Rook : Piece
         if (!isSelected) return;
         ChessBoardPlacementHandler.Instance.ClearHighlights();
         //They Are Friendly
-        //UpperSide
-        upperBlockInColumn = -1;
-        for (int i = _row + 1; i < 8; i++)
+        //topRightBlock
+        topRightBlock = -1;
+        for (int i = _row + 1, j = _column + 1; i < 8 && j < 8; i++, j++)
         {
-            if (i >= 0 && i < 8)
+            if (friendlyPiecesPos[i, j] == 1)
             {
-                if (friendlyPiecesPos[i, _column] == 1)
-                {
-                    upperBlockInColumn = i;
-                    break;
-                }
-                else
-                {
-                    ChessBoardPlacementHandler.Instance.Highlight(i, _column);
-                }
-            }
-        }
-        //lowerSide
-        lowerBlockInColumn = -1;
-        for (int i = _row - 1; i >= 0; i--)
-        {
-            if (i >= 0 && i < 8)
-            {
-                if (friendlyPiecesPos[i, _column] == 1)
-                {
-                    lowerBlockInColumn = i;
-                    break;
-                }
-                else
-                {
-                    ChessBoardPlacementHandler.Instance.Highlight(i, _column);
-                }
-            }
-        }
-        //rightSide
-        rightBlockInRow = -1;
-        for (int j = _column + 1; j < 8; j++)
-        {
-            if (friendlyPiecesPos[_row, j] == 1)
-            {
-                rightBlockInRow = j;
+                topLeftBlock = i;
                 break;
             }
             else
             {
-                ChessBoardPlacementHandler.Instance.Highlight(_row, j);
+                ChessBoardPlacementHandler.Instance.Highlight(i, j);
             }
         }
-        //leftSide
-        leftBlockInRow = -1;
-        for (int j = _column - 1; j >= 0; j--)
+        //topLeftBlock
+        topLeftBlock = -1;
+        for (int i = _row + 1, j = _column - 1; i < 8 && j >= 0; i++, j--) 
         {
-            if (friendlyPiecesPos[_row, j] == 1)
+            if (friendlyPiecesPos[i, j] == 1)
             {
-                leftBlockInRow = j;
+                topRightBlock = i;
                 break;
             }
             else
             {
-                ChessBoardPlacementHandler.Instance.Highlight(_row, j);
+                ChessBoardPlacementHandler.Instance.Highlight(i, j);
+            }
+        }
+        //bottomRightBlock
+        bottomRightBlock = -1;
+        for (int i = _row - 1, j = _column + 1; i >=0 && j < 8;i--,j++)
+        {
+            if (friendlyPiecesPos[i, j] == 1)
+            {
+                bottomRightBlock = j;
+                break;
+            }
+            else
+            {
+                ChessBoardPlacementHandler.Instance.Highlight(i, j);
+            }
+        }
+        //bottomLeftBlock
+        bottomLeftBlock = -1;
+        for (int i=_row-1,j = _column - 1; i >= 0 && j >= 0; i--, j--)
+        {
+            if (friendlyPiecesPos[i, j] == 1)
+            {
+                bottomLeftBlock = j;
+                break;
+            }
+            else
+            {
+                ChessBoardPlacementHandler.Instance.Highlight(i, j);
             }
         }
     }

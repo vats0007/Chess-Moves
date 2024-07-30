@@ -6,4 +6,18 @@ public abstract class Piece : MonoBehaviour
 {
     public abstract void CalculatePossibleMoves();
     public abstract void CheckForFriendlyPieces();
+
+    protected bool isSelected = false;
+
+    public virtual void Select()
+    {
+        isSelected = true;
+        CalculatePossibleMoves();
+    }
+
+    public virtual void Deselect()
+    {
+        isSelected = false;
+        ChessBoardPlacementHandler.Instance.ClearHighlights();
+    }
 }
